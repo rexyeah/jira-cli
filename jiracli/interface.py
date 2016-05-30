@@ -132,6 +132,9 @@ def build_parser():
     view.add_argument('--comments-only', dest='comments_only',
                       help='displays only the comments assosciated with each issue',
                       action='store_true')
+    view.add_argument('--last-comment', dest='last_comment',
+                      help='displays only the last comment',
+                      action='store_true')
     view.add_argument('jira_ids', nargs='*', help='jira issue ids')
 
 

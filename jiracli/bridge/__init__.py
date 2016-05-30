@@ -32,7 +32,7 @@ class JiraBridge(object):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self.base_url)
 
-    def format_issue(self, issue, mode=0, formatter=None, comments_only=False):
+    def format_issue(self, issue, mode=0, formatter=None, comments_only=False, last_comment=False):
         fields = {}
         status_color = "blue"
         status_string = JiraBridge.object_from_key(
@@ -90,6 +90,21 @@ class JiraBridge(object):
             for comment in comments:
                 comment_str =  comment["body"].strip()
                 fields["comments"] += "%s %s : %s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), comment_str )
+        if mode == 1 or last_comment:
+            fields["description"] = issue.setdefault("description","") or ""
+            if not issue.get("priority", ""):
+                self.fields["priority"] = ""
+            else:
+                fields["priority"] = JiraBridge.object_from_key(issue["priority"], self.get_priorities)["name"]
+            fields["type"] = JiraBridge.object_from_key(
+                issue["type"],
+                self.get_issue_types if 'parent' not in issue else self.get_subtask_issue_types
+            )["name"]
+            fields["comments"] = "\n"
+            comments = self.get_issue_comments(issue["key"])
+            for comment in comments:
+                comment_str =  comment["body"].strip()
+                fields["comments"] = "%s %s : %s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), comment_str )
         children_string = ""
         if mode > 1:
             description = (issue.setdefault("description", "") or "").split("\n")
@@ -103,7 +118,7 @@ class JiraBridge(object):
                     child["key"], child["summary"], colorfunc("%s/browse/%s" % (self.base_url, child["key"]), "white", attrs=['underline'])
                 )
                 children_string += "%s : %s\n" % (key, value)
-        if comments_only:
+        if comments_only or last_comment:
             return fields["comments"].strip()
         elif mode < 0:
             url_str = colorfunc(parse.urljoin(self.base_url, "/browse/%s" % (issue["key"])), "white", attrs=["underline"])

@@ -148,7 +148,7 @@ def check_auth(username, password):
         token = _login(username,password)
         open(os.path.expanduser("~/.jira-cli/auth"),"w").write(token)
 
-def format_issue( issue , mode = 0, formatter=None, comments_only=False):
+def format_issue( issue , mode = 0, formatter=None, comments_only=False, last_comment=False):
     fields = {}
     global colorfunc
     status_color="blue"
@@ -195,7 +195,16 @@ def format_issue( issue , mode = 0, formatter=None, comments_only=False):
         for comment in comments:
             comment_str =  comment["body"].strip()
             fields["comments"] += "%s %s : %s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), comment_str )
-    if comments_only:
+    if mode >=1 or last_comment:
+        fields["description"] = issue.setdefault("description","")
+        fields["priority"] = get_issue_priority( issue.setdefault("priority",""))
+        fields["type"] = get_issue_type( issue.setdefault("type","") )
+        comments = get_comments ( issue["key"] )
+        fields["comments"] = "\n"
+        for comment in comments:
+            comment_str =  comment["body"].strip()
+            fields["comments"] = "%s %s : %s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), comment_str )
+    if comments_only or last_comment:
         return fields["comments"].strip()
     elif mode < 0:
         url_str = colorfunc("%s/browse/%s" % (jirabase, issue["key"]), "white", attrs=["underline"])
@@ -275,6 +284,8 @@ here"
     parser.add_option("-c", "--comment", dest="comment", help="comment on a jira", action="store_true")
     parser.add_option("", "--comments-only", dest="commentsonly", help="show only the comments for a jira",
                       action="store_true")
+    parser.add_option("", "--last-comment", dest="lastcomment", help="show only the last comment for a jira",
+                      action="store_true")
     parser.add_option("-j", "--jira-id", dest="jira_id", help="issue id")
     parser.add_option("", "--filter", dest="filter",
                       help="filter(s) to use for listing jiras. use a comma to separate multiple filters")
@@ -314,7 +325,6 @@ here"
             for el in  get_issue_type(None):
                 print(el["name"], ":", el["description"])
         else:
-
             if opts.issue_type:
                 project = opts.jira_project
                 if args:
