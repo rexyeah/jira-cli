@@ -91,15 +91,15 @@ class JiraBridge(object):
                 comment_str =  comment["body"].strip()
                 fields["comments"] += "%s %s : %s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), comment_str )
         if mode == 1 or last_comment:
-            fields["description"] = issue.setdefault("description","") or ""
-            if not issue.get("priority", ""):
-                self.fields["priority"] = ""
-            else:
-                fields["priority"] = JiraBridge.object_from_key(issue["priority"], self.get_priorities)["name"]
-            fields["type"] = JiraBridge.object_from_key(
-                issue["type"],
-                self.get_issue_types if 'parent' not in issue else self.get_subtask_issue_types
-            )["name"]
+            # fields["description"] = issue.setdefault("description","") or ""
+            # if not issue.get("priority", ""):
+            #     self.fields["priority"] = ""
+            # else:
+            #     fields["priority"] = JiraBridge.object_from_key(issue["priority"], self.get_priorities)["name"]
+            # fields["type"] = JiraBridge.object_from_key(
+            #     issue["type"],
+            #     self.get_issue_types if 'parent' not in issue else self.get_subtask_issue_types
+            # )["name"]
             fields["comments"] = "\n"
             comments = self.get_issue_comments(issue["key"])
             for comment in comments:
