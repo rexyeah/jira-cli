@@ -93,9 +93,9 @@ class JiraBridge(object):
         if mode == 1 or last_comment:
             fields["comments"] = "\n"
             comments = self.get_issue_comments(issue["key"])
-            for comment in comments:
-                comment_str =  comment["body"].strip().replace("{noformat}", "------------------------------------------------------------------------------------------------")
-                fields["comments"] = "%s %s : \n%s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), colorfunc(comment_str, "white", "on_grey"))
+            comment = comments[-1]
+            comment_str =  comment["body"].strip().replace("{noformat}", "------------------------------------------------------------------------------------------------")
+            fields["comments"] = "%s %s : \n%s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), colorfunc(comment_str, "white", "on_grey"))
         children_string = ""
         if mode > 1:
             description = (issue.setdefault("description", "") or "").split("\n")
