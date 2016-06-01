@@ -94,7 +94,8 @@ class JiraBridge(object):
             fields["comments"] = "\n"
             comments = self.get_issue_comments(issue["key"])
             comment = comments[-1]
-            comment_str =  comment["body"].strip().replace("{noformat}", "------------------------------------------------------------------------------------------------")
+            comment_str =  comment["body"].strip()
+            comment_str = re.sub(r"\{[\w:]*\}", "-" * 80, comment_str)
             fields["comments"] = "%s %s : \n%s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), colorfunc(comment_str, "white", "on_grey"))
         children_string = ""
         if mode > 1:
