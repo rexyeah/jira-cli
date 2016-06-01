@@ -32,7 +32,7 @@ class JiraBridge(object):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self.base_url)
 
-    def format_issue(self, issue, mode=0, formatter=None, comments_only=False, last_comment=False):
+    def format_issue(self, issue, mode=0, formatter=None, comments_only=False, last_comment=False, num_comments=1):
         fields = {}
         status_color = "blue"
         status_string = JiraBridge.object_from_key(
@@ -97,6 +97,15 @@ class JiraBridge(object):
             comment_str =  comment["body"].strip()
             comment_str = re.sub(r"\{[\w:]*\}", "-" * 80, comment_str)
             fields["comments"] = "%s %s : \n%s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), colorfunc(comment_str, "white", "on_grey"))
+        if num_comments > 1:
+            fields["comments"] = "\n"
+            comments = self.get_issue_comments(issue["key"])
+            comments.reverse()
+            for comment in comments[:int(num_comments)]:
+                comment_str =  comment["body"].strip()
+                comment_str = re.sub(r"\{[\w:]*\}", "-" * 80, comment_str)
+                fields["comments"] += "%s %s : \n%s\n" % ( colorfunc(comment["created"], "blue"), colorfunc(comment["author"], "green"), colorfunc(comment_str, "white", "on_grey"))
+            return fields["comments"].strip()
         children_string = ""
         if mode > 1:
             description = (issue.setdefault("description", "") or "").split("\n")

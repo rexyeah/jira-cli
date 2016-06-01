@@ -45,7 +45,8 @@ class ViewCommand(Command):
                 mode=mode,
                 formatter=self.args.format,
                 comments_only=self.args.comments_only,
-                last_comment=self.args.last_comment
+                last_comment=self.args.last_comment,
+                num_comments=self.args.num_comments
             ))
 
 class ListCommand(Command):
